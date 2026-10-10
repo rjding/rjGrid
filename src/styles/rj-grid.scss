@@ -1,0 +1,2507 @@
+// rj-grid 主题与结构样式（CSS 变量驱动，可整体覆盖）
+.rj-grid {
+  --rj-font-size: 13px;
+  --rj-border: #e4e7ed;
+  --rj-border-strong: #c9ced6;
+  --rj-bg: #ffffff;
+  --rj-bg-alt: #fafbfc;
+  --rj-header-bg: #f4f6f8;
+  --rj-header-hover: #ebeef2;
+  --rj-text: #303133;
+  --rj-text-secondary: #909399;
+  --rj-primary: #3b76f6;
+  --rj-primary-bg: #eaf1fe;
+  --rj-hover-bg: #e6edf9;
+  --rj-selected-bg: #e2edfd;
+  --rj-range-bg: rgba(59, 118, 246, 0.1);
+  --rj-fill-bg: rgba(59, 118, 246, 0.16);
+  --rj-flash-bg: #fff3cf;
+  --rj-mask: rgba(255, 255, 255, 0.75);
+  --rj-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  --rj-find-bg: #ffd04d;
+  --rj-find-active-bg: #ff9600;
+  --rj-danger: #f56c6c;
+  --rj-radius: 4px;
+  --rj-group-guide: #d3d7de;
+  // 密度三档联动的 UI 尺度变量（中档为默认；小/大档在下方覆盖）：
+  // 工具条/底栏按钮、输入框、分页器、查询胶囊随密度同比例缩放，与表体行高/字号一致。
+  --rj-ui-h: 26px;
+  --rj-ui-font: 12px;
+  --rj-ui-gap: 8px;
+  --rj-ui-pad: 6px 10px;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font-size: var(--rj-font-size);
+  color: var(--rj-text);
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border);
+  border-radius: var(--rj-radius);
+  overflow: hidden;
+  outline: none;
+  box-sizing: border-box;
+  * {
+    box-sizing: border-box;
+  }
+
+  &.rj--dark {
+    --rj-border: #3a3f4b;
+    --rj-border-strong: #4b5160;
+    --rj-bg: #1e222a;
+    --rj-bg-alt: #232831;
+    --rj-header-bg: #262b36;
+    --rj-header-hover: #2e3441;
+    --rj-text: #dfe3ea;
+    --rj-text-secondary: #8a919f;
+    --rj-primary: #5c8dfb;
+    --rj-primary-bg: #24324d;
+    --rj-hover-bg: #313a4d;
+    --rj-selected-bg: #2a3a5c;
+    --rj-mask: rgba(30, 34, 42, 0.75);
+    --rj-flash-bg: #5a4c1e;
+    --rj-group-guide: #3a3f4b;
+  }
+
+  // 三档密度（小/中/大）：行高由 JS 同步用于虚拟滚动，这里控制字体/内边距与整套 UI 尺度
+  &.rj--small {
+    --rj-font-size: 12px;
+    --rj-ui-h: 22px;
+    --rj-ui-font: 11px;
+    --rj-ui-gap: 6px;
+    --rj-ui-pad: 4px 8px;
+  }
+  &.rj--large {
+    --rj-font-size: 14px;
+    --rj-ui-h: 32px;
+    --rj-ui-font: 13px;
+    --rj-ui-gap: 10px;
+    --rj-ui-pad: 8px 12px;
+  }
+}
+
+// ---------------- 工具条（第一行：查询条件/查询按钮靠左，分页靠右；第二行：分组横幅靠左，功能键块靠右） ----------------
+.rj-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--rj-ui-gap, 8px);
+  padding: var(--rj-ui-pad, 6px 10px);
+  border-bottom: 1px solid var(--rj-border);
+  background: var(--rj-bg);
+  flex-shrink: 0;
+
+  .rj-toolbar-left,
+  .rj-toolbar-right {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    min-width: 0;
+    gap: var(--rj-ui-gap, 8px);
+  }
+  .rj-toolbar-right {
+    margin-left: auto;
+  }
+}
+// 第二行：左行分组拖放横幅（可选，占满剩余宽）+ 右功能键块（与原第一行右侧互换而来，即上一版分页器内联的位置）。
+// 功能键块段屏蔽 dragover/drop 冒泡，拖列头掠过按钮区不误触分组。
+.rj-second-bar {
+  display: flex;
+  align-items: center;
+  // 横幅与功能键块严格同一行：不换行，窄容器下横幅文本自动折行、按钮组内部换行
+  flex-wrap: nowrap;
+  gap: var(--rj-ui-gap, 8px);
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--rj-border);
+  background: var(--rj-bg-alt);
+  flex-shrink: 0;
+
+  .rj-drop-banner {
+    flex: 0 1 auto;
+    // 窄容器下让位给功能键块：横幅可压缩到隐藏（chip 出现时由文本省略号兜底）
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0;
+    border-bottom: none;
+    background: transparent;
+    font-size: var(--rj-ui-font, 12px);
+  }
+  .rj-toolbar-right {
+    display: flex;
+    align-items: center;
+    // 功能键块严格不换行：窄容器下压缩按钮内边距仍放不下时整体横向滚动，绝不折到第二行
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    min-width: 0;
+    gap: var(--rj-ui-gap, 8px);
+    margin-left: auto;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
+
+.rj-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: var(--rj-ui-h, 26px);
+  padding: 0 calc(var(--rj-ui-h, 26px) * 0.35);
+  font-size: var(--rj-ui-font, 12px);
+  color: var(--rj-text);
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border-strong);
+  border-radius: var(--rj-radius);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--rj-primary);
+    border-color: var(--rj-primary);
+  }
+  &.is-active {
+    color: #fff;
+    background: var(--rj-primary);
+    border-color: var(--rj-primary);
+  }
+}
+
+.rj-input {
+  height: var(--rj-ui-h, 26px);
+  padding: 0 8px;
+  font-size: var(--rj-ui-font, 12px);
+  color: var(--rj-text);
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border-strong);
+  border-radius: var(--rj-radius);
+  outline: none;
+
+  &:focus {
+    border-color: var(--rj-primary);
+  }
+}
+
+// 主按钮（查询/保存等主要动作）：与 .rj-btn 同尺寸，主题色实底
+.rj-btn-primary {
+  color: #fff;
+  background: var(--rj-primary);
+  border-color: var(--rj-primary);
+
+  &:hover {
+    color: #fff;
+    filter: brightness(1.06);
+  }
+}
+
+// 危险操作钮（查询栏 actions 删除类）：红字红描边，hover 反白实底
+.rj-btn-danger {
+  color: var(--rj-danger, #e54d42);
+  border-color: currentcolor;
+
+  &:hover {
+    color: #fff;
+    background: var(--rj-danger, #e54d42);
+  }
+}
+
+// 按钮通用禁用态：查询栏操作按钮无选中行时置灰（点击由 runQueryAction 再过一道）
+.rj-btn[disabled] {
+  color: var(--rj-text-secondary);
+  opacity: 0.6;
+  cursor: not-allowed;
+
+  &:hover {
+    color: var(--rj-text-secondary);
+    border-color: var(--rj-border-strong);
+  }
+}
+
+// 主按钮禁用态（弹窗提交钮计数为 0 时）：主题色褪为浅底，避免亮蓝看起来像可点
+.rj-btn-primary[disabled],
+.rj-btn-primary[disabled]:hover {
+  color: var(--rj-bg);
+  background: var(--rj-border-strong);
+  border-color: var(--rj-border-strong);
+  opacity: 1;
+}
+
+// ---------------- 查询条件栏（queryable）----------------
+// 内联到工具条左上（原快速搜索位），作为 .rj-toolbar-left 的一段，不再独占整行。
+.rj-query-bar {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--rj-ui-gap, 8px);
+  align-items: center;
+  min-width: 0;
+  font-size: var(--rj-ui-font, 12px);
+}
+.rj-query-item {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 2px 4px 2px 8px;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border-strong);
+  border-radius: 14px;
+}
+.rj-query-label {
+  font-weight: 600;
+  color: var(--rj-text);
+  white-space: nowrap;
+}
+.rj-query-op,
+.rj-query-val,
+.rj-query-add {
+  height: calc(var(--rj-ui-h, 26px) - 2px);
+  padding: 0 6px;
+  font-size: var(--rj-ui-font, 12px);
+  color: var(--rj-text);
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border-strong);
+  border-radius: var(--rj-radius);
+  outline: none;
+
+  &:focus {
+    border-color: var(--rj-primary);
+  }
+}
+.rj-query-val {
+  min-width: 120px;
+
+  &.sm {
+    min-width: 96px;
+    width: 120px;
+  }
+
+  &[multiple] {
+    height: auto;
+    min-height: calc(var(--rj-ui-h, 26px) - 2px);
+    max-height: 72px;
+    padding: 2px;
+  }
+}
+// 查询栏可搜索树形下拉（RjOptionSelect）：外观对齐 .rj-query-val，面板层级缩进 + 搜索
+.rj-query-select.rj-opt-select {
+  position: relative;
+  display: inline-flex;
+  min-width: 120px;
+  font-size: var(--rj-ui-font, 12px);
+}
+.rj-opt-trigger {
+  display: inline-flex;
+  flex: 1;
+  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: calc(var(--rj-ui-h, 26px) - 2px);
+  padding: 0 6px;
+  font-size: var(--rj-ui-font, 12px);
+  color: var(--rj-text);
+  cursor: pointer;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border-strong);
+  border-radius: var(--rj-radius);
+  outline: none;
+
+  &:focus,
+  &:hover {
+    border-color: var(--rj-primary);
+  }
+
+  &.is-placeholder .rj-opt-text {
+    color: var(--rj-text-secondary);
+  }
+}
+.rj-opt-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rj-opt-arrow {
+  flex: none;
+  color: var(--rj-text-secondary);
+}
+.rj-opt-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  min-width: 100%;
+  max-width: 320px;
+  margin-top: 2px;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border);
+  border-radius: var(--rj-radius);
+  box-shadow: var(--rj-shadow);
+}
+.rj-opt-search {
+  width: calc(100% - 8px);
+  height: calc(var(--rj-ui-h, 26px) - 2px);
+  padding: 0 6px;
+  margin: 4px;
+  font-size: var(--rj-ui-font, 12px);
+  color: var(--rj-text);
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border-strong);
+  border-radius: var(--rj-radius);
+  outline: none;
+
+  &:focus {
+    border-color: var(--rj-primary);
+  }
+}
+.rj-opt-list {
+  max-height: 220px;
+  overflow: auto;
+}
+.rj-opt-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 4px 8px;
+  line-height: 1.5;
+  cursor: pointer;
+
+  &:hover,
+  &.is-active {
+    color: var(--rj-primary);
+    background: var(--rj-primary-bg);
+  }
+
+  &.is-selected .rj-option-label {
+    font-weight: 600;
+  }
+}
+.rj-opt-check {
+  flex: none;
+  margin: 0;
+}
+.rj-opt-empty {
+  padding: 6px 8px;
+  color: #999;
+}
+.rj-query-add {
+  border-style: dashed;
+}
+.rj-query-tilde {
+  color: var(--rj-text-secondary);
+}
+.rj-query-del {
+  padding: 0 3px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--rj-text-secondary);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--rj-danger, #f56c6c);
+  }
+}
+// 钮组分簇：查询/重置为「查询核」，与宿主操作钮之间画分隔线，避免一排六七个钮挤成一片
+.rj-query-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.rj-query-core {
+  display: inline-flex;
+  gap: 6px;
+}
+.rj-query-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--rj-border-strong);
+  opacity: 0.65;
+}
+// 操作钮簇/插槽钮簇：组内留呼吸感，窄屏整簇换行后组内仍可继续折
+.rj-query-action-btns,
+.rj-query-slot-btns {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+// ---------------- 工具条功能按钮（第二行） + 快速搜索弹层 ----------------
+// 图标方形按钮（🔍 快速搜索 / ◈ 视图）：宽高随密度档位，图标居中。
+.rj-tool-btn {
+  justify-content: center;
+  width: var(--rj-ui-h, 26px);
+  // 功能键块 nowrap：图标按钮不参与收缩，窄容器由块横向滚动兜底
+  flex-shrink: 0;
+  padding: 0;
+  font-size: calc(var(--rj-ui-font, 12px) + 2px);
+}
+// 快速搜索弹层：基于 .rj-popup 族（根内 fixed、z-index 2900、有背景/边框/阴影），
+// 默认锚定在 🔍 按钮下方，下方放不下才向上弹；与视图菜单(.rj-menu 3000)/命名弹框互斥打开，不重叠。
+.rj-quick-pop {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  width: 240px;
+}
+.rj-quick-ico {
+  flex-shrink: 0;
+  color: var(--rj-text-secondary);
+}
+.rj-quick-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.rj-quick-clear {
+  flex-shrink: 0;
+  padding: 0 3px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--rj-text-secondary);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--rj-danger, #f56c6c);
+  }
+}
+
+// 命名弹框：根内同级 fixed 遮罩 + 居中卡片（不 Teleport，保留主题变量）
+.rj-view-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 35%);
+}
+.rj-view-dlg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 340px;
+  padding: 16px 18px;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border-strong);
+  border-radius: calc(var(--rj-radius) + 2px);
+  box-shadow: 0 8px 30px rgb(0 0 0 / 20%);
+}
+.rj-view-dlg-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rj-text);
+}
+.rj-view-dlg-label {
+  font-size: 12px;
+  color: var(--rj-text-secondary);
+}
+.rj-view-dlg-tip {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--rj-text-secondary);
+}
+.rj-view-dlg-foot {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+// ---------------- 导出按钮组（打印 / CSV / PDF / Excel）----------------
+// 四个等宽紧凑按钮聚成一组，左侧分隔线与其它工具按钮区分；工具条本身 flex-wrap，窄屏会整体换行不错乱。
+.rj-export-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 8px;
+  border-left: 1px solid var(--rj-border);
+}
+.rj-btn-export {
+  height: var(--rj-ui-h, 26px);
+  flex-shrink: 0;
+  padding: 0 calc(var(--rj-ui-h, 26px) * 0.3);
+  font-size: var(--rj-ui-font, 12px);
+  font-weight: 500;
+}
+
+// ---------------- 工具栏即时提示（#3）----------------
+// 原生 title 延迟不可控、不跟随主题；改用 data-tip + JS 定位的 fixed 单例气泡（仿 .rj-menu），
+// 悬停即现。工具栏容器 overflow-x:auto 会裁掉纯 CSS ::after，故气泡挂网格根层的 fixed 节点（不被裁）。
+.rj-tip {
+  position: fixed;
+  z-index: 3100;
+  // 按内容取宽（max-content），不受“fixed 元素靠视口右边 shrink-to-fit”影响，避免右端按钮气泡被挤成窄高条
+  width: max-content;
+  max-width: 240px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--rj-bg);
+  text-align: left;
+  white-space: normal;
+  pointer-events: none;
+  background: var(--rj-text);
+  border-radius: var(--rj-radius);
+  box-shadow: var(--rj-shadow);
+  // 右缘对齐按钮右缘、向左下生长（工具栏靠右，避免超出视口右边）
+  transform: translateX(-100%);
+}
+
+// ---------------- 分页器 ----------------
+// 基础盒样式：随密度档位缩放字号/间隙；顶栏内联（rj-pager-inline）去竖向内边距贴齐工具条。
+.rj-pager {
+  display: flex;
+  align-items: center;
+  gap: var(--rj-ui-gap, 8px);
+  padding: var(--rj-ui-pad, 6px 10px);
+  font-size: var(--rj-ui-font, 12px);
+}
+// 分页器内联进顶栏工具条时：靠右、去内边距贴齐工具条；窄容器下参与收缩（下方规则隐藏次要元素）
+.rj-pager-inline {
+  margin-left: auto;
+  padding: 0;
+  flex-shrink: 1;
+  min-width: 0;
+}
+// 导航按钮组：显式不可收缩，收缩只发生在次要元素/间隙上
+.rj-pager .rj-pager-nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--rj-pager-nav-gap, 6px);
+  flex-shrink: 0;
+}
+// 窄容器（整页 <1200px，如 demo 侧栏挤压）：顶栏内联分页器隐藏「共N条/条数选择」。
+// 注意 .rj-toolbar 是 flex-wrap:wrap——wrap 模式下成员先换行、不收缩，仅靠 flex-shrink 无法同行；
+// 因此同步收紧各级 gap（工具条/查询条/翻页按钮组）让一行真正装得下。
+@media (max-width: 1199px) {
+  .rj-toolbar {
+    --rj-pager-nav-gap: 4px;
+    gap: 4px var(--rj-ui-gap, 8px); // 仅收紧横向 gap，行间距不变
+
+    .rj-toolbar-left,
+    .rj-toolbar-right {
+      gap: 4px;
+    }
+    .rj-query-bar {
+      gap: 4px;
+    }
+    // 紧凑密度：竖线保留（窄屏反而需要分组线索），簇内距收紧
+    .rj-query-actions {
+      gap: 6px;
+    }
+    .rj-query-action-btns,
+    .rj-query-slot-btns {
+      gap: 4px;
+    }
+    .rj-pager-inline .rj-pager-opt {
+      display: none;
+    }
+    .rj-pager-inline {
+      gap: 4px;
+    }
+  }
+}
+// 分页（pagerPosition bottom/both）在表体之下独占一行
+.rj-pager-bar {
+  display: flex;
+  flex-shrink: 0;
+  background: var(--rj-bg);
+  border-top: 1px solid var(--rj-border);
+
+  .rj-pager {
+    flex: 1;
+  }
+}
+
+// ---------------- 表头 ----------------
+.rj-header {
+  position: relative;
+  flex-shrink: 0;
+  background: var(--rj-header-bg);
+  border-bottom: 1px solid var(--rj-border);
+  overflow: hidden;
+  user-select: none;
+
+  .rj-header-main {
+    position: relative;
+    overflow: hidden;
+  }
+  // 冻结列表头裁切层：覆盖在滚动表头之上，横向不跟随滚动（left/right/width 由组件内联给出）
+  .rj-header-clip {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    overflow: hidden;
+    z-index: 3;
+    background: var(--rj-header-bg);
+  }
+  .rj-hrow {
+    display: flex;
+    width: 100%;
+  }
+  .rj-hcell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 10px;
+    height: 100%;
+    font-weight: 600;
+    border-right: 1px solid var(--rj-border);
+    cursor: default;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    &.is-sortable {
+      cursor: pointer;
+    }
+    &:hover {
+      background: var(--rj-header-hover);
+    }
+    &.is-dragging {
+      opacity: 0.4;
+    }
+    &.is-dragover {
+      box-shadow: inset 2px 0 0 var(--rj-primary);
+    }
+    // 复选/拖拽等窄控制列：表头内边距对齐表体(.rj-cell 8px)，消除方框与表体 2px 错层
+    &.rj-hcell-ctl {
+      padding: 0 8px;
+      // 控制列无文字，标题用 flex 居中，使复选框纵向与表体一致（避免勾选时基线拖动）
+      .rj-hcell-title {
+        display: flex;
+        align-items: center;
+      }
+    }
+    .rj-hcell-title {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .rj-hcell-icons {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+  }
+  .rj-resize-handle {
+    position: absolute;
+    right: -3px;
+    top: 0;
+    bottom: 0;
+    width: 7px;
+    cursor: col-resize;
+    z-index: 3;
+
+    &:hover::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 15%;
+      bottom: 15%;
+      width: 2px;
+      background: var(--rj-primary);
+    }
+  }
+  .rj-sort-icon,
+  .rj-filter-icon,
+  .rj-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--rj-text-secondary);
+    cursor: pointer;
+    border-radius: 3px;
+
+    &.is-active {
+      color: var(--rj-primary);
+    }
+  }
+  .rj-menu-btn {
+    width: 16px;
+    height: 16px;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+
+    &:hover {
+      background: var(--rj-hover-bg);
+      color: var(--rj-text);
+    }
+  }
+  .rj-group-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 6px;
+    margin: 0 2px;
+    font-size: 12px;
+    font-weight: 400;
+    background: var(--rj-primary-bg);
+    color: var(--rj-primary);
+    border-radius: 10px;
+    cursor: grab;
+
+    .rj-group-chip-close {
+      cursor: pointer;
+      &:hover {
+        color: var(--rj-danger);
+      }
+    }
+  }
+}
+
+// 浮动筛选行
+.rj-frow {
+  border-top: 1px solid var(--rj-border);
+  background: var(--rj-bg-alt);
+}
+.rj-fcell {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  border-right: 1px solid var(--rj-border);
+  overflow: hidden;
+}
+.rj-finput {
+  width: 100%;
+  height: 22px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 400;
+  background: var(--rj-bg);
+}
+
+.rj-drop-banner {
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 12px;
+  color: var(--rj-text-secondary);
+  border-bottom: 1px solid var(--rj-border);
+  background: var(--rj-bg-alt);
+  gap: 4px;
+  flex-wrap: wrap;
+
+  &.is-over {
+    color: var(--rj-primary);
+    background: var(--rj-primary-bg);
+  }
+}
+
+// ---------------- 主体 ----------------
+.rj-body-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.rj-status {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--rj-text-secondary);
+  background: var(--rj-header-bg);
+  border-top: 1px solid var(--rj-border);
+  user-select: none;
+  overflow: hidden;
+}
+.rj-status-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex: none;
+}
+.rj-status-dirty {
+  color: #e6a23c;
+  font-weight: 600;
+}
+.rj-status-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+}
+.rj-status-agg {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.rj-status-agg b {
+  color: var(--rj-text);
+  font-weight: 600;
+}
+.rj-status-agg i {
+  font-style: normal;
+  color: var(--rj-primary);
+}
+.rj-status-more {
+  color: var(--rj-text-secondary);
+  white-space: nowrap;
+}
+
+.rj-scroller {
+  position: relative;
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--rj-border-strong);
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.rj-canvas {
+  position: relative;
+}
+
+.rj-rows {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.rj-fixed-layer {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 6;
+  pointer-events: none;
+  background: transparent;
+
+  // 冻结层画布：由组件写成单条 translateY，滚动时不逐行改 top
+  .rj-fixed-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    will-change: transform;
+  }
+
+  .rj-row,
+  .rj-hrow {
+    pointer-events: auto;
+  }
+}
+
+.rj-row {
+  position: absolute;
+  left: 0;
+  display: flex;
+  border-bottom: 1px solid var(--rj-border);
+  background: var(--rj-bg);
+  // 悬停行高亮跟随：斑马纹↔悬停色切换时底色缓动过渡
+  transition: background-color 0.16s ease;
+
+  // 悬停行最左侧刷痕指示条：常驻节点由 v-show 控制显隐；默认透明+压扁，仅 .is-hover 时笔刷式展开，
+  // 退出时 opacity 缓动，避免虚拟滚动挂载重播与硬切
+  .rj-hover-brush {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: -1px;
+    width: 4px;
+    z-index: 3;
+    pointer-events: none;
+    background: linear-gradient(90deg, var(--rj-primary), transparent);
+    transform-origin: left center;
+    opacity: 0;
+    transform: scaleX(0);
+    transition:
+      opacity 0.18s ease,
+      transform 0.18s ease;
+  }
+
+  &.rj-odd {
+    background: var(--rj-bg-alt);
+  }
+  // .rj-row.rj-row 双类提升权重，确保悬停色覆盖行尾组行/页脚/明细行等同权重后置规则
+  &.is-hover.rj-row {
+    background: var(--rj-hover-bg);
+
+    .rj-hover-brush {
+      width: 8px;
+      opacity: 1;
+      transform: scaleX(1);
+      animation: rj-brush-in 0.22s ease;
+    }
+  }
+  &.is-selected {
+    background: var(--rj-selected-bg);
+  }
+  &.is-flash {
+    animation: rj-flash 0.9s ease;
+  }
+  &.rj-group-row {
+    background: var(--rj-bg-alt);
+    font-weight: 500;
+  }
+  &.rj-group-footer {
+    background: var(--rj-primary-bg);
+    font-weight: 500;
+    font-style: italic;
+    border-top: 1px dashed var(--rj-border-strong);
+    color: var(--rj-primary);
+  }
+  &.rj-detail-row,
+  &.rj-fullwidth-row {
+    background: var(--rj-bg);
+  }
+}
+
+@keyframes rj-flash {
+  0% {
+    background: var(--rj-flash-bg);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+// 刷痕指示条笔刷式展开：自左侧 0 宽度刷出
+@keyframes rj-brush-in {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.rj-cell {
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  border-right: 1px solid var(--rj-border);
+  overflow: hidden;
+  background: inherit;
+
+  // 脏格：左上角三角标记（编辑未保存），带一次弹出动画
+  &.is-dirty::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 7px 7px 0 0;
+    border-color: #e6a23c transparent transparent transparent;
+    z-index: 2;
+    animation: rj-dirty-pop 0.18s ease-out;
+  }
+
+  // 公式错误格（#CIRCULAR! / #REF! / #NAME? 等哨兵）：标红加粗，便于定位坏公式与循环引用
+  &.is-fx-err {
+    color: #d93025;
+    font-weight: 600;
+  }
+
+  .rj-cell-inner {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+
+    &.wrap {
+      white-space: normal;
+      word-break: break-all;
+    }
+
+    // 自定义插槽 / cellRenderer 内容承载层：.rj-cell 的内联 line-height(=行高，用于单行文本垂直居中)
+    // 会被继承并撑高插槽里的每个块级元素，导致多行内容(如“字段名 / 表.列”两行)按 2×行高堆叠、被裁切错位。
+    // 复位为 normal 让块级内容按自然行高堆叠；单行仍由父级 flex(align-items:center) 垂直居中。
+    &.rj-cell-custom {
+      line-height: normal;
+    }
+  }
+  &.is-editing {
+    padding: 0;
+    overflow: visible;
+    z-index: 5;
+    box-shadow: inset 0 0 0 2px var(--rj-primary);
+  }
+  &.rj-cell-center {
+    justify-content: center;
+  }
+  &.rj-cell-right {
+    justify-content: flex-end;
+  }
+  &.rj-cell-link a {
+    color: var(--rj-primary);
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  // 图片列：真实 img 节点（尺寸由列配置内联给定，此处只管外形/交互）
+  &.rj-cell-img {
+    gap: 4px;
+  }
+  .rj-cell-img-el {
+    flex-shrink: 0;
+    object-fit: cover;
+    vertical-align: middle;
+    background: var(--rj-bg-alt);
+    cursor: zoom-in;
+    transition:
+      box-shadow 0.15s ease,
+      transform 0.15s ease;
+    &:hover {
+      box-shadow:
+        0 0 0 2px var(--rj-primary),
+        var(--rj-shadow);
+    }
+  }
+  .rj-img--square {
+    border-radius: 0;
+  }
+  .rj-img--rounded {
+    border-radius: var(--rj-radius);
+  }
+  .rj-img--circle {
+    border-radius: 50%;
+  }
+  .rj-cell-img-fallback {
+    color: var(--rj-text-secondary);
+    font-style: italic;
+  }
+}
+
+// ---------------- 内置操作列（col.actions）按钮组 ----------------
+// 默认描边按钮，超出列宽自动收入“更多⋯”下拉（.rj-cell-actions 自身裁切，测量层不可见）
+.rj-cell-actions {
+  display: inline-flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+.rj-act-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  height: 22px;
+  line-height: 1;
+  padding: 0 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  border-radius: var(--rj-radius, 2px);
+  border: 1px solid var(--rj-border-strong, var(--rj-border));
+  background: var(--rj-bg);
+  color: var(--rj-text);
+
+  &:hover:not(:disabled) {
+    border-color: var(--rj-primary);
+    color: var(--rj-primary);
+    background: var(--rj-hover-bg);
+  }
+  &.is-text {
+    border-color: transparent;
+    background: transparent;
+    color: var(--rj-primary);
+  }
+  &.is-text:hover:not(:disabled) {
+    background: var(--rj-hover-bg);
+    border-color: transparent;
+  }
+  &.is-danger {
+    border-color: #d93025;
+    color: #d93025;
+  }
+  &.is-danger.is-text {
+    border-color: transparent;
+  }
+  &.is-danger:hover:not(:disabled) {
+    border-color: #d93025;
+    color: #d93025;
+    background: rgba(217, 48, 37, 0.1);
+  }
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+.rj-act-ico {
+  font-size: 12px;
+}
+.rj-act-more {
+  padding: 0 6px;
+  letter-spacing: 1px;
+}
+.rj-act-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.rj-indent {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.rj-expand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-right: 2px;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--rj-text-secondary);
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--rj-primary-bg);
+    color: var(--rj-primary);
+  }
+}
+
+// 复选框（自绘，不依赖任何 UI 库）
+.rj-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--rj-border-strong);
+  border-radius: 3px;
+  cursor: pointer;
+  background: var(--rj-bg);
+  flex-shrink: 0;
+  color: #fff;
+  font-size: 10px;
+
+  &.is-checked,
+  &.is-indeterminate {
+    background: var(--rj-primary);
+    border-color: var(--rj-primary);
+  }
+}
+
+// 行拖拽手柄
+.rj-row-drag-handle {
+  // 撑满拖拽列内容盒：flex 单元 + 满高，整列都是 grab 热区（对齐 AG Grid）
+  flex: 1 1 auto;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: var(--rj-text-secondary);
+  // 触控设备上禁止浏览器默认滚动/手势接管 pointer，否则拖拽会被滚动手势抢走
+  touch-action: none;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+// 拖拽列单元格：去左右内边距，让手柄铺满整格宽
+.rj-cell.rj-cell-drag {
+  padding: 0;
+}
+
+// 拖拽行指示线
+.rj-row-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--rj-primary);
+  z-index: 9;
+  pointer-events: none;
+}
+
+// 拖拽跟手浮影：整行缩略快照，外观贴近真实行（主题底色 + 逐格分栏）；
+// 位置由 JS 每帧直写 transform（合成器层），故固定于左上角原点
+.rj-drag-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 4000;
+  pointer-events: none;
+  display: flex;
+  align-items: stretch;
+  max-width: 560px;
+  padding: 0;
+  border-radius: 6px;
+  background: var(--rj-bg);
+  color: var(--rj-text);
+  font-size: 13px;
+  line-height: 1.4;
+  border: 1px solid var(--rj-primary);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+  opacity: 0.96;
+  overflow: hidden;
+  transform-origin: left center;
+  will-change: transform;
+
+  .rj-drag-ghost-cell {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    padding: 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-right: 1px solid var(--rj-border);
+
+    &:last-of-type {
+      border-right: none;
+    }
+
+    // 图片列：小缩略占位块（不加载真实图，避免 data URI 注入与解码开销）
+    &.is-img .rj-drag-ghost-img {
+      display: block;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      background: var(--rj-border);
+    }
+
+    // 迷你图列：若干竖杠示意走势
+    &.is-spark .rj-drag-ghost-spark {
+      display: block;
+      width: 72%;
+      height: 12px;
+      opacity: 0.6;
+      background: repeating-linear-gradient(90deg, var(--rj-primary) 0 3px, transparent 3px 7px);
+    }
+  }
+
+  .rj-drag-ghost-empty {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    color: var(--rj-text-secondary);
+  }
+}
+
+// ---------------- 区域选择 / 活动单元格 ----------------
+.rj-range-rect {
+  position: absolute;
+  background: var(--rj-range-bg);
+  border: 1px solid var(--rj-primary);
+  pointer-events: none;
+  z-index: 4;
+
+  &.is-fill {
+    background: var(--rj-fill-bg);
+    border-style: dashed;
+  }
+}
+
+.rj-active-rect {
+  position: absolute;
+  border: 2px solid var(--rj-primary);
+  pointer-events: none;
+  z-index: 5;
+}
+
+// Ctrl+拖拽追加的多选区（已提交区域）
+.rj-extra-rect {
+  position: absolute;
+  background: var(--rj-range-bg);
+  border: 1px solid var(--rj-primary);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.rj-fill-handle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: var(--rj-primary);
+  border: 1px solid #fff;
+  cursor: crosshair;
+  z-index: 7;
+}
+
+// 查找高亮
+.rj-find-hit {
+  background: var(--rj-find-bg);
+  border-radius: 2px;
+}
+.rj-find-current {
+  background: var(--rj-find-active-bg);
+}
+
+// ---------------- 编辑器 ----------------
+.rj-editor {
+  width: 100%;
+  height: 100%;
+  display: flex;
+
+  input,
+  select,
+  textarea {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    outline: none;
+    padding: 0 6px;
+    font-size: inherit;
+    font-family: inherit;
+    color: var(--rj-text);
+    background: color-mix(in srgb, var(--rj-primary) 6%, var(--rj-bg));
+  }
+
+  .rj-editor-textarea {
+    padding: 4px 6px;
+    line-height: 1.4;
+    height: 100%;
+    resize: none;
+    outline: none;
+  }
+
+  .rj-editor-select {
+    position: relative;
+    flex: 1;
+    display: flex;
+
+    .rj-editor-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 200px;
+      overflow: auto;
+      z-index: 30;
+      background: var(--rj-bg);
+      border: 1px solid var(--rj-border);
+      box-shadow: var(--rj-shadow);
+
+      .rj-editor-option {
+        padding: 4px 8px;
+        cursor: pointer;
+        line-height: 1.5;
+
+        &:hover,
+        &.is-active {
+          background: var(--rj-primary-bg);
+          color: var(--rj-primary);
+        }
+
+        &.is-selected {
+          font-weight: 600;
+          color: var(--rj-primary);
+        }
+      }
+    }
+  }
+}
+
+// 树形下拉共用样式（RjEditor 单元格下拉 / RjOptionSelect 查询栏下拉）：行弹性布局 + 展开箭头 + 标签省略
+.rj-option-tree {
+  .rj-option-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .rj-option-caret {
+    flex: none;
+    width: 14px;
+    color: var(--rj-text-secondary);
+    cursor: pointer;
+    user-select: none;
+
+    &.is-leaf {
+      cursor: default;
+    }
+  }
+
+  .rj-option-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.rj-editor-error {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 2px;
+  padding: 2px 8px;
+  font-size: 12px;
+  color: #fff;
+  background: var(--rj-danger);
+  border-radius: 3px;
+  white-space: nowrap;
+  z-index: 40;
+}
+
+// 网格内轻提示：顶部居中浮出，自动消失（解释「为何不能拖拽」这类否则只能默默失败的操作）
+// 靠顶而不靠底：网格高于视口时，底部定位的提示会落在折叠线外，变成“拒了但没说”
+.rj-grid-toast {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  font-size: 12px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.72);
+  border-radius: var(--rj-radius);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 45;
+}
+
+// ---------------- 汇总行 / 固定行 ----------------
+.rj-summary {
+  position: relative; // 冻结列副本层的定位锚
+  flex-shrink: 0;
+  border-top: 2px solid var(--rj-border);
+  background: var(--rj-header-bg);
+  overflow: hidden;
+
+  .rj-summary-row {
+    display: flex;
+    position: relative;
+    font-weight: 600;
+  }
+
+  // 左/右冻结列副本：整宽行反向位移后由本容器裁切，让钉行与合计行的冻结列不跟横滚
+  .rj-summary-clip {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    overflow: hidden;
+    // 必须自带底色：否则下方整宽行的非冻结单元格会从副本层透出来，形成重影
+    background: var(--rj-header-bg);
+    z-index: 2;
+  }
+}
+
+// ---------------- 加载 / 空态 ----------------
+.rj-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--rj-mask);
+  z-index: 20;
+  color: var(--rj-text-secondary);
+
+  .rj-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--rj-border-strong);
+    border-top-color: var(--rj-primary);
+    border-radius: 50%;
+    animation: rj-spin 0.8s linear infinite;
+  }
+}
+
+@keyframes rj-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rj-load-more {
+  padding: 6px;
+  text-align: center;
+  color: var(--rj-text-secondary);
+  font-size: 12px;
+}
+
+// ---------------- 浮层：右键菜单 / 筛选面板 / 列面板 ----------------
+.rj-menu {
+  position: fixed;
+  min-width: 160px;
+  max-width: 320px;
+  padding: 4px 0;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border);
+  border-radius: var(--rj-radius);
+  box-shadow: var(--rj-shadow);
+  z-index: 3000;
+  font-size: 13px;
+  box-sizing: border-box;
+
+  .rj-menu-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: 1.5;
+
+    &:hover {
+      background: var(--rj-hover-bg);
+    }
+    &.is-disabled {
+      color: var(--rj-text-secondary);
+      cursor: not-allowed;
+    }
+    // 自定义右键菜单危险项（contextMenus danger）红字；同时禁用时回到禁用灰，避免误读为可点
+    &.is-danger {
+      color: var(--rj-danger, #f56c6c);
+    }
+    &.is-danger.is-disabled {
+      color: var(--rj-text-secondary);
+    }
+  }
+  .rj-menu-item-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .rj-menu-divider {
+    height: 1px;
+    margin: 4px 0;
+    background: var(--rj-border);
+  }
+  .rj-menu-sub-arrow {
+    flex-shrink: 0;
+    margin-left: auto;
+    color: var(--rj-text-secondary);
+  }
+}
+
+// 子菜单：相对父项右侧弹出，不与主菜单重叠
+.rj-menu-sub {
+  position: absolute;
+  left: 100%;
+  top: -5px;
+  margin-left: 2px;
+  z-index: 3100;
+}
+
+// 列头三页签菜单（通用 / 筛选 / 列），对标 AG Grid column menu
+.rj-colmenu {
+  position: fixed;
+  z-index: 3000;
+  width: 260px;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border);
+  border-radius: var(--rj-radius);
+  box-shadow: var(--rj-shadow);
+  font-size: 13px;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  .rj-colmenu-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--rj-border);
+    background: var(--rj-header-bg, var(--rj-bg));
+  }
+  .rj-colmenu-tab {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 4px;
+    cursor: pointer;
+    color: var(--rj-text-secondary);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+
+    &:hover {
+      color: var(--rj-text);
+    }
+    &.is-active {
+      color: var(--rj-primary);
+      border-bottom-color: var(--rj-primary);
+      font-weight: 600;
+    }
+  }
+  .rj-colmenu-tab-ic {
+    font-size: 12px;
+  }
+  .rj-colmenu-body {
+    padding: 8px 0;
+    max-height: 360px;
+    overflow: auto;
+  }
+  .rj-colmenu-body:has(.rj-popup.is-inline) {
+    padding: 10px;
+  }
+  .rj-colmenu-title {
+    padding: 4px 14px 8px;
+    font-weight: 600;
+    color: var(--rj-text);
+  }
+  .rj-colmenu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    line-height: 1.5;
+    white-space: nowrap;
+
+    // 「通用」页签的生效冻结项：与「列」页签 .is-pinned 同一口径（主题淡底 + 左侧色条），
+    // 再配尾部勾号（✓ 是文字字形、吃 color；📌 是 emoji 着色无效，所以图钉本身用灰度表意）
+    &.is-active {
+      background: var(--rj-primary-bg);
+      box-shadow: inset 2px 0 0 var(--rj-primary);
+
+      .rj-colmenu-ic {
+        filter: grayscale(1);
+        opacity: 0.8;
+      }
+    }
+    &:hover {
+      background: var(--rj-hover-bg);
+    }
+  }
+  .rj-colmenu-ic {
+    width: 16px;
+    text-align: center;
+    color: var(--rj-text-secondary);
+    flex-shrink: 0;
+  }
+  .rj-colmenu-cur {
+    margin-left: auto;
+    color: var(--rj-primary);
+  }
+  .rj-colmenu-divider {
+    height: 1px;
+    margin: 4px 0;
+    background: var(--rj-border);
+  }
+  .rj-colmenu-list {
+    max-height: 260px;
+    overflow: auto;
+  }
+  .rj-colmenu-draghint {
+    padding: 0 14px 6px;
+    font-size: 11px;
+    color: var(--rj-text-secondary);
+  }
+  .rj-colmenu-col {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    cursor: grab;
+
+    // 已冻结条目整行标记：主题淡底 + 左侧色条，扫一眼就知道哪些列钉住了（不依赖图钉颜色能否辨认）
+    &.is-pinned {
+      background: var(--rj-primary-bg);
+      box-shadow: inset 2px 0 0 var(--rj-primary);
+    }
+    &:hover {
+      background: var(--rj-hover-bg);
+    }
+    // 拖拽悬停目标：顶部插入线提示落点
+    &.is-dragover {
+      box-shadow: inset 0 2px 0 0 var(--rj-primary);
+      background: var(--rj-hover-bg);
+    }
+  }
+  .rj-colmenu-grip {
+    flex-shrink: 0;
+    width: 12px;
+    text-align: center;
+    color: var(--rj-text-secondary);
+    cursor: grab;
+    user-select: none;
+  }
+  .rj-colmenu-eye,
+  .rj-colmenu-pin {
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 18px;
+    text-align: center;
+    color: var(--rj-text-secondary);
+
+    &:hover {
+      color: var(--rj-primary);
+    }
+  }
+  // 冻结态必须真看得出区别：默认图标 icons.pin 是 emoji 📌，彩色字形不吃 CSS color，
+  // 只把 .is-on 换成主题色等于没换（实测列表里所有列图钉一个样）。所以已冻结用
+  // 灰度图钉（filter 对 emoji 有效）+ 方位标签 + 条目行底色三重信号，任一条都不靠颜色深浅；
+  // 宿主把 icons.pin 覆盖成文本字形时，下面几条 color 依然生效。
+  .rj-colmenu-pin.is-on {
+    color: var(--rj-text-secondary);
+    filter: grayscale(1);
+    opacity: 0.8;
+
+    &:hover {
+      // 悬停恢复彩色：把「点这里可取消冻结」讲在图标上
+      filter: none;
+      color: var(--rj-primary);
+      opacity: 1;
+    }
+  }
+  .rj-colmenu-pin-tag {
+    flex-shrink: 0;
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 14px;
+    // 只用描边不用实底：条目行本身已是 --rj-primary-bg 淡底，同色底会把标签吞掉
+    color: var(--rj-primary);
+    border: 1px solid currentColor;
+    border-radius: 4px;
+  }
+  .rj-colmenu-col-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .rj-colmenu-foot {
+    display: flex;
+    gap: 14px;
+    padding: 8px 14px 2px;
+    border-top: 1px solid var(--rj-border);
+    margin-top: 4px;
+
+    a {
+      color: var(--rj-primary);
+      cursor: pointer;
+      font-size: 12px;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.rj-popup {
+  position: fixed;
+  z-index: 2900;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border);
+  border-radius: var(--rj-radius);
+  box-shadow: var(--rj-shadow);
+  padding: 10px;
+  font-size: 13px;
+
+  // 内联模式：作为列菜单“筛选”页签嵌入，取消绝对定位与阴影
+  &.is-inline {
+    position: static;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    z-index: auto;
+    width: 100%;
+  }
+
+  .rj-popup-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .rj-cond-del {
+    width: 18px;
+    height: 18px;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 50%;
+    color: var(--rj-text-secondary, #909399);
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &:hover {
+      color: #fff;
+      background: #e54d42;
+    }
+  }
+  .rj-adv-link {
+    font-size: 12px;
+    color: var(--rj-primary, #3b76f6);
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .rj-popup-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+  .rj-adv-dialog {
+    width: 440px;
+    max-width: calc(100% - 16px);
+    max-height: 70vh;
+    overflow: auto;
+  }
+  .rj-adv-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .rj-adv-group {
+    border: 1px dashed transparent;
+    padding: 4px 0;
+
+    &.is-nested {
+      margin: 4px 0 4px 12px;
+      padding: 6px;
+      border-color: var(--rj-border, #dcdfe6);
+      border-radius: var(--rj-radius, 4px);
+      background: var(--rj-hover-bg, rgba(0, 0, 0, 0.02));
+    }
+  }
+  .rj-adv-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .rj-adv-item {
+    margin-bottom: 6px;
+  }
+  .rj-adv-cond {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .rj-adv-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+
+    a {
+      font-size: 12px;
+      color: var(--rj-primary, #3b76f6);
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  .rj-adv-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    color: var(--rj-text-secondary, #909399);
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &:hover {
+      color: #fff;
+      background: #e54d42;
+    }
+  }
+  .rj-check-list {
+    max-height: 220px;
+    overflow: auto;
+    border: 1px solid var(--rj-border);
+    border-radius: var(--rj-radius);
+    padding: 4px;
+
+    .rj-check-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 4px;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--rj-hover-bg);
+      }
+    }
+  }
+}
+
+.rj-radio-tabs {
+  display: inline-flex;
+  border: 1px solid var(--rj-border-strong);
+  border-radius: var(--rj-radius);
+  overflow: hidden;
+
+  span {
+    padding: 2px 8px;
+    cursor: pointer;
+    font-size: 12px;
+
+    &.is-active {
+      background: var(--rj-primary);
+      color: #fff;
+    }
+  }
+}
+
+// 侧边工具面板
+.rj-panel {
+  width: 230px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--rj-border);
+  background: var(--rj-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .rj-panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--rj-border);
+
+    .rj-panel-tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
+      cursor: pointer;
+      font-size: 13px;
+
+      &.is-active {
+        color: var(--rj-primary);
+        box-shadow: inset 0 -2px 0 var(--rj-primary);
+      }
+    }
+  }
+  .rj-panel-body {
+    flex: 1;
+    overflow: auto;
+    padding: 8px;
+  }
+  .rj-panel-section {
+    font-size: 12px;
+    color: var(--rj-text-secondary);
+    margin: 6px 0 4px;
+  }
+  .rj-panel-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 3px;
+    cursor: grab;
+
+    // 可勾选行：整行为热区，复选框本身不吃指针事件（避免必须点小方块）
+    &.is-check {
+      cursor: pointer;
+
+      input[type='checkbox'] {
+        pointer-events: none;
+      }
+    }
+
+    // 已冻结条目：与列菜单「列」页签同一套标记（主题淡底 + 左侧色条），两个入口口径一致
+    &.is-pinned {
+      background: var(--rj-primary-bg);
+      box-shadow: inset 2px 0 0 var(--rj-primary);
+    }
+
+    &:hover {
+      background: var(--rj-hover-bg);
+    }
+    .rj-panel-item-title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .rj-panel-item-ops {
+      display: inline-flex;
+      gap: 4px;
+      color: var(--rj-text-secondary);
+
+      span {
+        cursor: pointer;
+        &:hover {
+          color: var(--rj-primary);
+        }
+      }
+      // 同 .rj-colmenu-pin.is-on：emoji 图钉不吃 color，靠灰度表「已冻结」，悬停恢复彩色提示可取消
+      .rj-panel-pin.is-on {
+        filter: grayscale(1);
+        opacity: 0.8;
+
+        &:hover {
+          filter: none;
+          opacity: 1;
+        }
+      }
+      .rj-panel-pin-tag {
+        padding: 0 4px;
+        font-size: 10px;
+        line-height: 14px;
+        color: var(--rj-primary);
+        border: 1px solid currentColor;
+        border-radius: 4px;
+      }
+    }
+  }
+}
+
+// 查找条
+.rj-find-bar {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border);
+  border-radius: var(--rj-radius);
+  box-shadow: var(--rj-shadow);
+  z-index: 50;
+}
+
+// 迷你图
+.rj-sparkline canvas {
+  display: block;
+  vertical-align: middle;
+}
+
+// 图片预览浮层（.rj-grid 内同级固定定位，以继承主题变量）
+.rj-img-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 4200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  cursor: zoom-out;
+  animation: rj-img-fade 0.16s ease-out;
+
+  img {
+    // 预览要“放大”：小尺寸图源（头像/图标/矢量图）至少撑到视口的 45%，大图仍受 86% 上限约束
+    min-width: min(45vw, 420px);
+    min-height: min(45vh, 420px);
+    max-width: 86vw;
+    max-height: 86vh;
+    object-fit: contain;
+    border-radius: var(--rj-radius);
+    background: var(--rj-bg);
+    box-shadow: var(--rj-shadow);
+    cursor: default;
+  }
+  .rj-img-viewer-close {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    padding: 4px 10px;
+    font-size: 20px;
+    line-height: 1;
+    color: #fff;
+    opacity: 0.85;
+    cursor: pointer;
+    user-select: none;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+@keyframes rj-img-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// 集成图表对话框
+.rj-chart-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .rj-chart-dialog {
+    width: 720px;
+    max-width: 92vw;
+    background: var(--rj-bg);
+    border-radius: 6px;
+    box-shadow: var(--rj-shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: var(--rj-text);
+
+    .rj-chart-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--rj-border);
+      font-weight: 600;
+
+      .rj-chart-close {
+        margin-left: auto;
+        cursor: pointer;
+        color: var(--rj-text-secondary);
+        &:hover {
+          color: var(--rj-danger);
+        }
+      }
+    }
+    .rj-chart-body {
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .rj-chart-canvas {
+      height: 360px;
+    }
+    // 可选依赖 echarts 缺失时的降级提示（不弹错、不阻断页面）
+    .rj-chart-warn {
+      padding: 8px 0;
+      font-size: 12px;
+      color: var(--rj-danger);
+    }
+  }
+}
+
+// ---------------- 行编辑弹窗 / 内置确认框（查询栏操作按钮） ----------------
+// 与图表弹窗同族的根内 fixed 遮罩：不 Teleport，保留 --rj 主题变量（预设/暗色自动适配）。
+// 尺度不随密度档位收缩：弹窗是聚焦式任务面，保持恒定呼吸感。
+.rj-form-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 30, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: rj-form-fade 0.16s ease-out;
+}
+.rj-row-form-dialog {
+  max-width: 92vw;
+  max-height: 82vh;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--rj-text);
+  animation: rj-form-pop 0.18s ease-out;
+}
+.rj-confirm-dialog {
+  width: 380px;
+  max-width: 92vw;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  color: var(--rj-text);
+  padding-bottom: 16px;
+  animation: rj-form-pop 0.18s ease-out;
+}
+// 内置行 JSON 查看器：与确认框同族同变量，仅宽体 + 等宽滚动正文
+.rj-json-dialog {
+  width: 560px;
+  max-width: 92vw;
+  background: var(--rj-bg);
+  border: 1px solid var(--rj-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  color: var(--rj-text);
+  padding-bottom: 16px;
+  animation: rj-form-pop 0.18s ease-out;
+
+  .rj-json-body {
+    margin: 12px 20px 0;
+    padding: 8px 10px;
+    max-height: 46vh;
+    overflow: auto;
+    font: 12px/1.6 ui-monospace, Menlo, Consolas, monospace;
+    white-space: pre;
+    tab-size: 2;
+    background: var(--rj-bg-alt);
+    border: 1px solid var(--rj-border);
+    border-radius: 6px;
+    color: var(--rj-text);
+    user-select: text;
+
+    // 滚动条与表体同族（默认粗灰条在暗色下很突兀）
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: var(--rj-border-strong);
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &:focus {
+      outline: 1px solid var(--rj-primary);
+      outline-offset: -1px;
+    }
+  }
+}
+.rj-form-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--rj-border);
+  font-size: 14px;
+  font-weight: 600;
+
+  .rj-form-close {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--rj-text-secondary);
+
+    &:hover {
+      color: var(--rj-danger);
+      background: var(--rj-hover-bg);
+    }
+  }
+}
+// 多选提示：通栏浅底信息条，与表单体拉开层次
+.rj-form-hint {
+  margin: 12px 20px 0;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: var(--rj-primary-bg);
+  color: var(--rj-text);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.rj-form-body {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 20px 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+
+  .rj-form-empty {
+    grid-column: 1 / -1;
+    padding: 24px 0;
+    text-align: center;
+    font-size: 12px;
+    color: var(--rj-text-secondary);
+  }
+}
+.rj-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  // 多行批量模式下未勾选字段：标题与控件降饱和，但「改」胶囊保持鲜亮（它是解锁入口）
+  &.is-off {
+    .rj-form-label,
+    .rj-form-input,
+    .rj-form-check {
+      opacity: 0.5;
+      filter: saturate(0.4);
+    }
+  }
+
+  .rj-form-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--rj-text);
+  }
+  // 批量模式的「改」胶囊勾选：居右不压标题，勾选即主题色实底，比裸勾选框更醒目
+  .rj-form-batch {
+    position: relative;
+    align-self: flex-end;
+    display: inline-flex;
+    align-items: center;
+    height: 18px;
+    margin-top: -2px;
+    padding: 0 8px;
+    border: 1px solid var(--rj-border-strong);
+    border-radius: 9px;
+    font-size: 11px;
+    line-height: 1;
+    color: var(--rj-text-secondary);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+
+    input {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+    }
+
+    &:has(input:checked) {
+      color: var(--rj-bg);
+      background: var(--rj-primary);
+      border-color: var(--rj-primary);
+    }
+  }
+  .rj-form-input {
+    width: 100%;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid var(--rj-border-strong);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--rj-text);
+    background: var(--rj-bg);
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: var(--rj-primary);
+      box-shadow: 0 0 0 2px var(--rj-range-bg);
+    }
+  }
+  select.rj-form-input {
+    cursor: pointer;
+  }
+  textarea.rj-form-input {
+    height: auto;
+    padding: 8px 10px;
+    resize: vertical;
+    line-height: 1.5;
+    font-family: inherit;
+  }
+  .rj-form-check {
+    align-self: flex-start;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--rj-primary);
+  }
+  .rj-form-error {
+    font-size: 12px;
+    color: var(--rj-danger);
+  }
+}
+.rj-confirm-msg {
+  padding: 18px 20px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+// 弹窗底栏：取消/应用靠右成组，钮间留明确边距；与表单体同左缘对齐（高级过滤的左右分布不同族，单独限定）
+// 注意：本弹窗根节点不挂 .rj-popup（它不属于列菜单族），.rj-popup-footer 的全局 flex 基线不命中，
+// 所以这里必须自带 display: flex，否则底栏会退回 inline-block 自然流、按钮粘连且不能右对齐。
+.rj-row-form-dialog,
+.rj-confirm-dialog,
+.rj-json-dialog {
+  > .rj-popup-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 0 20px 18px;
+
+    // 弹窗专属钮：不受密度档位收缩，加高加圆角更舒展；禁用态靠颜色区分，不再压暗透明度
+    .rj-btn {
+      height: 30px;
+      min-width: 76px;
+      justify-content: center;
+      padding: 0 16px;
+      border-radius: 6px;
+      font-size: 13px;
+
+      &[disabled] {
+        opacity: 1;
+      }
+    }
+    .rj-btn-primary[disabled],
+    .rj-btn-primary[disabled]:hover {
+      color: var(--rj-text-secondary);
+      background: var(--rj-bg-alt);
+      border-color: var(--rj-border-strong);
+    }
+  }
+}
+
+@keyframes rj-form-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes rj-form-pop {
+  from {
+    transform: translateY(8px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes rj-dirty-pop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "name": "rj-grid",
+  "version": "0.3.4",
+  "description": "零第三方依赖的自研 Vue3 虚拟表格：虚拟滚动 / 冻结列 / 行拖拽 / 分组透视 / 公式 / SSRM / 主题 i18n / 自然语言查询",
+  "type": "module",
+  "license": "MIT",
+  "author": "rjding",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rjding/rjGrid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rjding/rjGrid/issues"
+  },
+  "homepage": "https://github.com/rjding/rjGrid#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "main": "./dist/rj-grid.js",
+  "module": "./dist/rj-grid.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/rj-grid.js",
+      "default": "./dist/rj-grid.js"
+    },
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "vue": "^3.4.0",
+    "echarts": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "echarts": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "start": "vite --config vite.playground.config.ts",
+    "dev": "vite --config vite.playground.config.ts",
+    "build:play": "vite build --config vite.playground.config.ts",
+    "preview:play": "vite preview --config vite.playground.config.ts",
+    "build": "node ./node_modules/vite/bin/vite.js build --config vite.lib.config.ts && node --max_old_space_size=8192 ./node_modules/vue-tsc/bin/vue-tsc.js -p tsconfig.types.json && node build/rjDistCheck.mjs",
+    "check:dist": "node build/rjDistCheck.mjs",
+    "test": "esbuild __tests__/run.ts --bundle --platform=node --format=cjs --external:vue --outfile=node_modules/.cache/rjtest.cjs --log-level=error && node node_modules/.cache/rjtest.cjs",
+    "lint": "eslint --fix --ext .ts,.vue index.ts src __tests__ playground && stylelint \"src/styles/*.scss\"",
+    "ts": "node --max_old_space_size=8192 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit -p tsconfig.json",
+    "size": "node ./node_modules/vite/bin/vite.js build --config vite.size.config.ts && node build/rjSizeReport.mjs",
+    "publish:github": "node scripts/publish-github.mjs",
+    "publish:github:push": "node scripts/publish-github.mjs --push",
+    "prepublishOnly": "pnpm build && pnpm test"
+  },
+  "keywords": [
+    "vue3",
+    "virtual-table",
+    "data-grid",
+    "rj-grid"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "echarts": "^5.5.0",
+    "element-plus": "^2.11.7",
+    "esbuild": "^0.19.12",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-vue": "^9.33.0",
+    "postcss-html": "^1.6.0",
+    "sass": "^1.69.5",
+    "stylelint": "^16.22.0",
+    "stylelint-config-html": "^1.1.0",
+    "stylelint-config-recommended": "^14.0.0",
+    "stylelint-config-standard": "^36.0.1",
+    "stylelint-order": "^6.0.4",
+    "typescript": "5.3.3",
+    "vite": "5.1.4",
+    "vue": "3.5.12",
+    "vue-eslint-parser": "^9.3.2",
+    "vue-tsc": "^1.8.27"
+  }
+}

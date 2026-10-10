@@ -1,0 +1,22 @@
+{
+  // 发布类型声明生成（pnpm build 第二步）：只纳入包内源码，产出 dist/types/**.d.ts。
+  // 刻意 types:[] 且不含 playground/__tests__ —— 一旦包内残留对全局类型的隐式依赖，
+  // 这里就会报 TS2304，等于给「真解耦」再加一道闸。
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": false,
+    "rootDir": ".",
+    "outDir": "dist/types",
+    // 包内源码不依赖任何全局类型与 import.meta，清空 types 只靠源码自身的显式 import
+    "types": []
+  },
+  "include": [
+    "index.ts",
+    "src/**/*.ts",
+    "src/**/*.vue"
+  ],
+  "exclude": ["__tests__", "playground", "dist", "node_modules"]
+}
