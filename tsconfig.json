@@ -1,0 +1,41 @@
+{
+  // rj-grid 独立仓库类型检查基座（pnpm ts）：开关对齐原宿主仓 tsconfig + tsconfig.rjcheck 口径
+  // （strict 开、noImplicitAny/strictFunctionTypes 关、noUnusedLocals/Parameters 开），
+  // 源码在这里是「零宿主耦合」的：不引用全局声明、不依赖宿主 paths，types 只取 vite/client + node。
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "useDefineForClassFields": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "strictFunctionTypes": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "lib": ["esnext", "dom"],
+    "baseUrl": "./",
+    "types": ["vite/client", "node"],
+    "paths": {
+      // playground 演示页经包名引用本地源码（与 vite.playground.config.ts 的 alias 同口径）
+      "rj-grid": ["./index.ts"]
+    },
+    "noEmit": true
+  },
+  "include": [
+    "index.ts",
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "__tests__/**/*.ts",
+    "playground/**/*.ts",
+    "playground/**/*.vue"
+  ],
+  "exclude": ["dist", "node_modules", "playground-dist"]
+}
