@@ -1,0 +1,11 @@
+node_modules/
+.cache/
+playground-dist/
+*.log
+
+# GitHub 英文版发布产物（由 scripts/publish-github.mjs 生成，不入库）
+github-dist/
+
+# 注意：dist/ 是有意入库的 —— 宿主经 git URL 安装 rj-grid 时，
+# npm 按 package.json 的 files 字段从仓库内容做 pack 裁剪，dist 必须在库里。
+# 发布纪律：改源码后 pnpm build，源码与 dist 同一 commit 提交，不允许只推源码。
